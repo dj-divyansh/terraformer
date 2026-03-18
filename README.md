@@ -72,7 +72,6 @@ inventory-<resource_type>-<resource_group>.json
 Notes:
 - Primary output is `terraform show -json` (preferred, richer schema).
 - If `terraform show -json` fails, the script falls back to copying the raw `terraform.tfstate`.
-- `inventory-azure.json` is ignored by the API and is not part of the normal inventory set.
 
 ## Scripts (What To Run)
 
@@ -91,9 +90,10 @@ Notes:
   - [dataService.js](file:///d:/InfraMate/terraformer/api/src/services/dataService.js)
 
 Core endpoints:
-- `GET /api/v1/resources` aggregate across groups
-- `GET /api/v1/resources/:group` resources for a group
-- `GET /api/v1/resources/:group/:id` lookup by id/name
+- `GET /api/v1/resources` aggregate across types
+- `GET /api/v1/resources/:type` resources for a type (e.g., vm, disk, nic)
+- `GET /api/v1/resources/:type/:id` lookup by id/name
+- `POST /api/v1/cache/invalidate` force reload of inventory data from disk
 
 Filtering examples:
 - `/api/v1/resources/vm?location=eastus`

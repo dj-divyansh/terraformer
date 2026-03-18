@@ -2,7 +2,7 @@ const dataService = require('../services/dataService');
 const { filterData, sortData, selectFields } = require('../utils/apiFeatures');
 
 /**
- * Get all resources across all groups
+ * Get all resources across all types
  */
 exports.getAllResources = async (req, res, next) => {
   try {
@@ -10,8 +10,8 @@ exports.getAllResources = async (req, res, next) => {
     
     // Consolidate into a single array for global search
     let resources = [];
-    Object.keys(allData).forEach(group => {
-      resources = resources.concat(allData[group].map(item => ({...item, _group: group})));
+    Object.keys(allData).forEach(type => {
+      resources = resources.concat(allData[type].map(item => ({...item, _type: type})));
     });
 
     // Filtering
@@ -50,21 +50,21 @@ exports.getAllResources = async (req, res, next) => {
 };
 
 /**
- * Get resources for a specific group (vm, disk, nic)
+ * Get resources for a specific type (vm, disk, nic, etc.)
  */
-exports.getResourceGroup = async (req, res, next) => {
+exports.getResourcesByType = async (req, res, next) => {
   try {
-    const { group } = req.params;
+    const { type } = req.params;
     const allData = await dataService.getAllResources();
     
-    if (!allData[group]) {
+    if (!allData[type]) {
       return res.status(404).json({
         status: 'fail',
-        message: `Resource group '${group}' not found. Available groups: ${Object.keys(allData).join(', ')}`
+        message: `Resource type '${type}' not found. Available types: ${Object.keys(allData).join(', ')}`
       });
     }
 
-    let resources = allData[group];
+    let resources = allData[type];
 
     // Debug logging for test
     if (process.env.NODE_ENV === 'test') {
@@ -107,21 +107,21 @@ exports.getResourceGroup = async (req, res, next) => {
 };
 
 /**
- * Get a specific resource by ID within a group
+ * Get a specific resource by ID within a type
  */
 exports.getResourceById = async (req, res, next) => {
   try {
-    const { group, id } = req.params;
+    const { type, id } = req.params;
     const allData = await dataService.getAllResources();
 
-    if (!allData[group]) {
+    if (!allData[type]) {
       return res.status(404).json({
         status: 'fail',
-        message: `Resource group '${group}' not found.`
+        message: `Resource type '${type}' not found.`
       });
     }
 
-    const resource = allData[group].find(item => item.id === id || item.name === id);
+    const resource = allData[type].find(item => item.id === id || item.name === id);
 
     if (!resource) {
       return res.status(404).json({

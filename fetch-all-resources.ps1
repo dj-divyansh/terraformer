@@ -192,7 +192,7 @@ Write-Status "--------------------------------------------------"
 
 if (Test-Path $GenerateScript) {
     # Execute the generation script
-    Invoke-Expression -Command "$GenerateScript"
+    & $GenerateScript
 } else {
     Write-ErrorMsg "Generation script ($GenerateScript) not found!"
 }

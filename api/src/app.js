@@ -9,6 +9,7 @@ const errorHandler = require('./middleware/errorHandler');
 const validateQuery = require('./middleware/validateQuery');
 const swaggerUi = require('swagger-ui-express');
 const openapiSpec = require('./docs/openapi');
+const dataService = require('./services/dataService');
 
 const app = express();
 
@@ -30,6 +31,12 @@ app.use('/api/v1/nic', validateQuery, nicRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
 app.get('/api-docs.json', (req, res) => {
   res.json(openapiSpec);
+});
+
+// Cache invalidation
+app.post('/api/v1/cache/invalidate', (req, res) => {
+  dataService.invalidateCache();
+  res.status(200).json({ status: 'success', message: 'Cache invalidated' });
 });
 
 // Health check

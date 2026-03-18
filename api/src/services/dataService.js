@@ -155,9 +155,14 @@ class DataService {
     return results;
   }
 
-  async getResourceGroup(group) {
+  async getResourcesByType(type) {
     const all = await this.getAllResources();
-    return all[group] || [];
+    return all[type] || [];
+  }
+
+  invalidateCache() {
+    this.cache = {};
+    this.lastLoad = 0;
   }
 }
 

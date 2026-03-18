@@ -19,6 +19,7 @@ const mockData = {
 describe('Resource API', () => {
   beforeEach(() => {
     dataService.getAllResources.mockResolvedValue(mockData);
+    dataService.invalidateCache = jest.fn();
   });
 
   describe('GET /api/v1/resources', () => {
@@ -27,7 +28,7 @@ describe('Resource API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.status).toBe('success');
       expect(res.body.results).toBe(4); // 2 VMs + 2 Disks
-      expect(res.body.data[0]).toHaveProperty('_group');
+      expect(res.body.data[0]).toHaveProperty('_type');
     });
 
     it('should filter by location', async () => {
@@ -38,15 +39,15 @@ describe('Resource API', () => {
     });
   });
 
-  describe('GET /api/v1/resources/:group', () => {
-    it('should return resources for a specific group', async () => {
+  describe('GET /api/v1/resources/:type', () => {
+    it('should return resources for a specific type', async () => {
       const res = await request(app).get('/api/v1/resources/vm');
       expect(res.statusCode).toBe(200);
       expect(res.body.results).toBe(2);
       expect(res.body.data[0].type).toBe('azurerm_linux_virtual_machine');
     });
 
-    it('should return 404 for unknown group', async () => {
+    it('should return 404 for unknown type', async () => {
       const res = await request(app).get('/api/v1/resources/unknown');
       expect(res.statusCode).toBe(404);
     });
@@ -81,7 +82,7 @@ describe('Resource API', () => {
     });
   });
 
-  describe('GET /api/v1/resources/:group/:id', () => {
+  describe('GET /api/v1/resources/:type/:id', () => {
     it('should return a specific resource', async () => {
       const res = await request(app).get('/api/v1/resources/vm/vm1');
       expect(res.statusCode).toBe(200);
@@ -91,6 +92,16 @@ describe('Resource API', () => {
     it('should return 404 if resource not found', async () => {
       const res = await request(app).get('/api/v1/resources/vm/nonexistent');
       expect(res.statusCode).toBe(404);
+    });
+  });
+
+  describe('POST /api/v1/cache/invalidate', () => {
+    it('should invalidate the cache', async () => {
+      const res = await request(app).post('/api/v1/cache/invalidate');
+      expect(res.statusCode).toBe(200);
+      expect(res.body.status).toBe('success');
+      expect(res.body.message).toBe('Cache invalidated');
+      expect(dataService.invalidateCache).toHaveBeenCalled();
     });
   });
 });

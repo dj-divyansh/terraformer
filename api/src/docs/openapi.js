@@ -20,7 +20,7 @@ const spec = swaggerJSDoc(options);
 spec.paths = {
   '/api/v1/resources': {
     get: {
-      summary: 'List all resources across groups',
+      summary: 'List all resources across types',
       parameters: [
         { in: 'query', name: 'page', schema: { type: 'integer', minimum: 1 } },
         { in: 'query', name: 'limit', schema: { type: 'integer', minimum: 1, maximum: 1000 } },
@@ -69,11 +69,11 @@ spec.paths = {
       responses: { 200: { description: 'OK' } },
     },
   },
-  '/api/v1/resources/{group}': {
+  '/api/v1/resources/{type}': {
     get: {
-      summary: 'List resources by group (vm, disk, nic)',
+      summary: 'List resources by type (vm, disk, nic, etc.)',
       parameters: [
-        { in: 'path', name: 'group', required: true, schema: { type: 'string', enum: ['vm', 'disk', 'nic'] } },
+        { in: 'path', name: 'type', required: true, schema: { type: 'string' }, description: 'Resource type key (e.g. vm, disk, nic, virtual_network)' },
         { in: 'query', name: 'page', schema: { type: 'integer', minimum: 1 } },
         { in: 'query', name: 'limit', schema: { type: 'integer', minimum: 1, maximum: 1000 } },
         { in: 'query', name: 'sort', schema: { type: 'string' } },
@@ -87,21 +87,30 @@ spec.paths = {
       ],
       responses: {
         200: { description: 'OK' },
-        404: { description: 'Group not found' },
+        404: { description: 'Type not found' },
         400: { description: 'Bad Request' },
       },
     },
   },
-  '/api/v1/resources/{group}/{id}': {
+  '/api/v1/resources/{type}/{id}': {
     get: {
       summary: 'Get a resource by ID (or name)',
       parameters: [
-        { in: 'path', name: 'group', required: true, schema: { type: 'string', enum: ['vm', 'disk', 'nic'] } },
+        { in: 'path', name: 'type', required: true, schema: { type: 'string' }, description: 'Resource type key' },
         { in: 'path', name: 'id', required: true, schema: { type: 'string' } },
       ],
       responses: {
         200: { description: 'OK' },
         404: { description: 'Resource not found' },
+      },
+    },
+  },
+  '/api/v1/cache/invalidate': {
+    post: {
+      summary: 'Invalidate the in-memory resource cache',
+      description: 'Forces the API to reload inventory data from disk on the next request.',
+      responses: {
+        200: { description: 'Cache invalidated' },
       },
     },
   },
